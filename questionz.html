@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Asistente Educativo de Operaciones</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f8ff;
+            color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            flex-direction: column;
+        }
+
+        .container {
+            text-align: center;
+            background: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 90%;
+            max-width: 600px;
+        }
+
+        #exercise-container {
+            margin: 20px 0;
+        }
+
+        #answer {
+            padding: 10px;
+            width: 80%;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        button {
+            padding: 10px 20px;
+            margin: 10px 5px;
+            border: none;
+            border-radius: 5px;
+            background-color: #007bff;
+            color: #fff;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        #feedback {
+            margin: 20px 0;
+            font-size: 1.2em;
+        }
+
+        #progress-container {
+            width: 100%;
+            background-color: #e0e0e0;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+
+        #progress-bar {
+            height: 20px;
+            width: 0;
+            background-color: #4caf50;
+        }
+
+        .info-table {
+            text-align: left;
+            margin-bottom: 20px;
+            background: #e6f7ff;
+            padding: 10px;
+            border-radius: 5px;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .info-table h2 {
+            margin-top: 0;
+        }
+
+        .info-table ul {
+            padding-left: 20px;
+        }
+    </style>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+    <div class="container">
+        <div class="info-table">
+            <h2>Jerarquía de Operaciones</h2>
+            <ul>
+                <li>1. Paréntesis \( () \)</li>
+                <li>2. Corchetes \( [] \)</li>
+                <li>3. Llaves \( \{\} \)</li>
+                <li>4. Multiplicación y División \( \cdot \), \( / \)</li>
+                <li>5. Suma y Resta \( + \), \( - \)</li>
+            </ul>
+        </div>
+        <h1>Asistente Educativo de Operaciones</h1>
+        <div id="exercise-container">
+            <div id="exercise"></div>
+            <input type="text" id="answer" placeholder="Escribe tu respuesta">
+            <button id="hint">Pista</button>
+        </div>
+        <div id="feedback"></div>
+        <div id="progress-container">
+            <div id="progress-bar"></div>
+        </div>
+    </div>
+    <script>
+        const exercises = [
+            "{[2 + 3] \\cdot (4 - 2)}",
+            "[(5 - 3) \\cdot 2] + {6 / 2}",
+            "{(3 + 2) \\cdot [4 - (1 + 1)]}",
+            "[(2 \\cdot 3) - (4 / 2)] + {5 - 3}",
+            "{[6 / 2] + (3 \\cdot 2)} - 4",
+            "[(4 + 2) \\cdot (3 - 1)] - {5 / 1}",
+            "{[(3 \\cdot 2) - (4 / 2)] \\cdot [6 - 3]}",
+            "[(8 / 2) + {2 \\cdot (3 + 1)}] - 5",
+            "{[(5 - 2) + (4 \\cdot 3)] - [2 \\cdot (6 / 2)]}",
+            "[(3 + 7) / 2] + {[(8 - 4) \\cdot 2] - 3}",
+            "{[(12 / 4) \\cdot (3 + 1)] - (5 - 2)}",
+            "[(6 \\cdot 2) - {3 + [4 - (2 / 1)]}]",
+            "{(8 - 3) \\cdot [2 + (6 / 3)]} - 4",
+            "[(5 + 2) \\cdot {3 - (8 / 4)}] + [7 - 5]",
+            "{(9 - 4) \\cdot [(3 + 2) - (6 / 3)]} + (8 - 6)"
+        ];
+
+        const correctAnswers = [10, 7, 10, 6, 5, 7, 12, 7, 9, 10, 9, 7, 16, 9, 17];
+
+        let currentExerciseIndex = 0;
+        let progress = 0;
+
+        function renderExercise() {
+            const exercise = exercises[currentExerciseIndex];
+            document.getElementById('exercise').innerHTML = `\\(${exercise}\\)`;
+            MathJax.typeset();
+        }
+
+        function checkAnswer(event) {
+            if (event.key === 'Enter') {
+                const userAnswer = document.getElementById('answer').value;
+                const correctAnswer = correctAnswers[currentExerciseIndex];
+                if (parseInt(userAnswer) === correctAnswer) {
+                    document.getElementById('feedback').innerText = "¡Buen trabajo! Sigue adelante.";
+                    progress += 100 / exercises.length;
+                    document.getElementById('progress-bar').style.width = progress + '%';
+                    currentExerciseIndex++;
+                    if (currentExerciseIndex < exercises.length) {
+                        renderExercise();
+                    } else {
+                        document.getElementById('feedback').innerText = "¡Felicidades! Has completado todos los ejercicios.";
+                    }
+                } else {
+                    document.getElementById('feedback').innerText = "Inténtalo de nuevo, ¡tú puedes!";
+                }
+                document.getElementById('answer').value = '';
+            }
+        }
+
+        function giveHint() {
+            const hints = [
+                "¿Has simplificado las llaves primero?",
+                "Revisa si multiplicaste correctamente los signos negativos.",
+                "No olvides las reglas de jerarquía de operaciones."
+            ];
+            const randomHint = hints[Math.floor(Math.random() * hints.length)];
+            document.getElementById('feedback').innerText = randomHint;
+        }
+
+        document.getElementById('answer').addEventListener('keydown', checkAnswer);
+        document.getElementById('hint').addEventListener('click', giveHint);
+
+        renderExercise();
+    </script>
+</body>
+</html>
